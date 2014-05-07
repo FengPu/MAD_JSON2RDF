@@ -45,14 +45,10 @@
 """
 import json
 import codecs
+from configobj import *
 
 class JSON2RDF:
-    """Extractor parses an RDF content and provides services:
-
-       1. extract URIs
-       2. extract Blank Nodes
-       3. look up for URI's line number
-       4. translate URIs into terms
+    """
     """
 
     def __init__(self):
@@ -79,12 +75,30 @@ class JSON2RDF:
         try:
             raw_data = json.loads(json_str)
             print 'pass'
+            for json_obj in raw_data:
+                print json_obj
         except ValueError:
             print 'exception'
 
+def reset_test_data():
+    config = ConfigObj()
+    config.filename = 'mapping.conf'
+    config['ObjectTypeUri'] = "http://cool_uri/facility"
+    config['ObjectId'] = "ID"
+    config['Attributes'] = {}
+    config['Attributes']["Name"] = "http://cool_uri/hasName"
+    config['Attributes']["Type"] = "http://cool_uri/hasType"
+    config['Attributes']["District"] = "http://cool_uri/hasDistrict"
+    config['Attributes']["Address"] = "http://cool_uri/hasAddress"
+    config['Attributes']["Telephon"] = "http://cool_uri/hasTelephon"
+    config['Attributes']["Latitude"] = "http://cool_uri/hasLatitude"
+    config['Attributes']["Longitude"] = "http://cool_uri/hasLongitude"
+    config['Attributes']["MoreInfo"] = "http://cool_uri/hasMoreInfo"
+    config.write()
 
 def main():
     j2r = JSON2RDF()
+    reset_test_data()
     json_str = ""
     with codecs.open('./test_data/example.json','r',encoding='utf8') as f:
         json_str = f.read()

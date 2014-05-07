@@ -1,4 +1,5 @@
 [{
+ "ID": "madis001",
  "Name": "三軍醫院",
  "Type": "醫院",
  "District": "士林區",
@@ -9,6 +10,7 @@
  "MoreInfo": ""
 },
 {
+ "ID": "madis002",
  "Name": "富安國小",
  "Type": "學校",
  "District": "士林區",
