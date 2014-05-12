@@ -45,7 +45,10 @@
 """
 import json
 import codecs
-from configobj import *
+from configobj import ConfigObj
+from rdflib import URIRef, BNode, Literal
+from rdflib import Graph
+
 
 class JSON2RDF:
     """
@@ -60,10 +63,34 @@ class JSON2RDF:
         The mapping file defines:
              1. JSON Key -> predicateURI
              2. primary key -> subject
-             3. atomic JSON object's type: to determine a tuple: primary key is_a type (optional)
+             3. atomic JSON object's type: to determine a tuple: primary key
+                is_a type (optional)
 
         '''
+        self.g = Graph()
+
+    def node_factory(self, node_type):
         pass
+
+    def triple(self, s, p, o):
+        s_node = URIRef(s)
+        p_node = URIRef(p)
+        o_node = Literal(o)
+        self.g.add((s_node, p_node, o_node))
+
+    def getSerializedStr(self):
+        return self.g.serialize(format='xml')
+
+    def getSerializedStrByFormat(self, output_format):
+        return self.g.serialize(format=output_format)
+
+    def clear(self):
+        self.g = Graph()
+
+    def json_object_translator(self, json_obj):
+        print "----"
+        print json_obj
+        print "----"
 
     def translate(self, json_str):
         '''This function is used to extract URIs.
@@ -76,9 +103,36 @@ class JSON2RDF:
             raw_data = json.loads(json_str)
             print 'pass'
             for json_obj in raw_data:
-                print json_obj
+                self.json_object_translator(json_obj)
         except ValueError:
             print 'exception'
+
+
+class Vocabulary(object):
+    #Object_ID_Prefix
+    ID_PREFIX = ""
+    #Attributes
+    NAME = ""
+    TYPE = ""
+    CATEGORY = ""
+    DISTRICT = ""
+    ADDRESS = ""
+    TELEPHONE = ""
+    LATITUDE = ""
+    LONGITUDE = ""
+    MOREINFO = ""
+    #Facility Categories
+    SHELTER_INDOOR = "Name"
+    SHELTER_OUTDOOR = ""
+    MEDICAL = ""
+    RESCUE = ""
+    LIVELIHOOD = ""
+    COMMUNICATION = ""
+    VOLUNTEER_ASSOCIATION = ""
+    TRANSPORTATION = ""
+    
+    
+    
 
 def reset_test_data():
     config = ConfigObj()
@@ -96,14 +150,12 @@ def reset_test_data():
     config['Attributes']["MoreInfo"] = "http://cool_uri/hasMoreInfo"
     config.write()
 
+
 def main():
     j2r = JSON2RDF()
     reset_test_data()
-    json_str = ""
-    with codecs.open('./test_data/example.json','r',encoding='utf8') as f:
+    with codecs.open('./test_data/example3.json', 'r', encoding='utf8') as f:
         json_str = f.read()
-    print json_str
     j2r.translate(json_str)
-
 if __name__ == "__main__":
     main()
