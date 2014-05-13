@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#    This file is part of X2R.
+#    This file is part of MAD.
 #
 #    MAD is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #
 # Module Name:
 #
-#    extractor.py
+#    JSON2RDF.py
 #
 # Abstract:
 
@@ -35,7 +35,7 @@
 # -*-
 
 """
-.. module:: extractor
+.. module:: JSON2RDF
    :platform: Unix, Linux, Windows
    :synopsis: A useful module indeed.
 
@@ -72,7 +72,7 @@ class JSON2RDF:
     def node_factory(self, node_type):
         pass
 
-    def triple(self, s, p, o):
+    def add_triple(self, s, p, o):
         s_node = URIRef(s)
         p_node = URIRef(p)
         o_node = Literal(o)
@@ -88,10 +88,28 @@ class JSON2RDF:
         self.g = Graph()
 
     def json_object_translator(self, json_obj):
-        print "----"
-        print json_obj
-        print "----"
+        keys = json_obj.keys()
+        idURI = ""
+        if "ID" in keys:
+            idURI = Vocabulary.ID_PREFIX + json_obj["ID"]
+            if "Category" in keys:
+                self.add_triple(idURI, Vocabulary.CATEGORY, json_obj["Category"])
+            if "Telephone" in keys:
+                self.add_triple(idURI, Vocabulary.TELEPHONE, json_obj["Telephone"])
+            if "Name" in keys:
+                self.add_triple(idURI, Vocabulary.NAME, json_obj["Name"])
+            if "District" in keys:
+                self.add_triple(idURI, Vocabulary.DISTRICT, json_obj["District"])
+            if "Longitude" in keys:
+                self.add_triple(idURI, Vocabulary.LONGITUDE, json_obj["Longitude"])
+            if "Latitude" in keys:
+                self.add_triple(idURI, Vocabulary.LATITUDE, json_obj["Latitude"])
+            if "MoreInfo" in keys:
+                self.add_triple(idURI, Vocabulary.MOREINFO, json_obj["MoreInfo"])
+        else:
+            pass # TODO: Log errors 
 
+        
     def translate(self, json_str):
         '''This function is used to extract URIs.
         :param json_str: valid JSON string.
@@ -104,32 +122,34 @@ class JSON2RDF:
             print 'pass'
             for json_obj in raw_data:
                 self.json_object_translator(json_obj)
+            return self.getSerializedStr()    
         except ValueError:
             print 'exception'
 
 
 class Vocabulary(object):
+    #TODO: initialize this class from configuration file
     #Object_ID_Prefix
-    ID_PREFIX = ""
+    ID_PREFIX = "http://openisdm.com/MAD/facility/"
     #Attributes
-    NAME = ""
-    TYPE = ""
-    CATEGORY = ""
-    DISTRICT = ""
-    ADDRESS = ""
-    TELEPHONE = ""
-    LATITUDE = ""
-    LONGITUDE = ""
-    MOREINFO = ""
+    NAME = "http://openisdm.com/MAD/property/hasName"
+    TYPE = "http://openisdm.com/MAD/property/hasType"
+    CATEGORY = "http://openisdm.com/MAD/property/hasCategory"
+    DISTRICT = "http://openisdm.com/MAD/property/hasDistrict"
+    ADDRESS = "http://openisdm.com/MAD/property/hasAddress"
+    TELEPHONE = "http://openisdm.com/MAD/property/hasTelephone"
+    LATITUDE = "http://openisdm.com/MAD/property/latitude"
+    LONGITUDE = "http://openisdm.com/MAD/property/longitude"
+    MOREINFO = "http://openisdm.com/MAD/property/moreInfo"
     #Facility Categories
-    SHELTER_INDOOR = "Name"
-    SHELTER_OUTDOOR = ""
-    MEDICAL = ""
-    RESCUE = ""
-    LIVELIHOOD = ""
-    COMMUNICATION = ""
-    VOLUNTEER_ASSOCIATION = ""
-    TRANSPORTATION = ""
+    SHELTER_INDOOR = "SHELTER INDOOR"
+    SHELTER_OUTDOOR = "SHELTER OUTDOOR"
+    MEDICAL = "MEDICAL"
+    RESCUE = "RESCUE"
+    LIVELIHOOD = "LIVELIHOOD"
+    COMMUNICATION = "COMMUNICATION"
+    VOLUNTEER_ASSOCIATION = "VOLUNTEER ASSOCIATION"
+    TRANSPORTATION = "TRANSPORTATION"
     
     
     
@@ -144,7 +164,7 @@ def reset_test_data():
     config['Attributes']["Type"] = "http://cool_uri/hasType"
     config['Attributes']["District"] = "http://cool_uri/hasDistrict"
     config['Attributes']["Address"] = "http://cool_uri/hasAddress"
-    config['Attributes']["Telephon"] = "http://cool_uri/hasTelephon"
+    config['Attributes']["Telephone"] = "http://cool_uri/hasTelephone"
     config['Attributes']["Latitude"] = "http://cool_uri/hasLatitude"
     config['Attributes']["Longitude"] = "http://cool_uri/hasLongitude"
     config['Attributes']["MoreInfo"] = "http://cool_uri/hasMoreInfo"
@@ -156,6 +176,6 @@ def main():
     reset_test_data()
     with codecs.open('./test_data/example3.json', 'r', encoding='utf8') as f:
         json_str = f.read()
-    j2r.translate(json_str)
+    print j2r.translate(json_str)
 if __name__ == "__main__":
     main()
